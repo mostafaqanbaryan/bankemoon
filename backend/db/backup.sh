@@ -10,7 +10,6 @@ LOG_ERROR=/var/log/backup_errors.log
 if ! pg_dump -Fc $PGNAME 2> $LOG_ERROR > $FILENAME
 then
 	# Send Email
-	#cat $LOG_ERROR | mailx 'shantia_73@yahoo.com' -s 'Database Backup FAILED'
 	RESULT="ERROR_DB"
 else
 	# Compressed with gzip
