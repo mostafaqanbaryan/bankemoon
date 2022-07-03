@@ -1,0 +1,12 @@
+# Reverse DNS module for google ip validation
+# Use nginx -V for getting command line properties
+# And use those in .configure
+
+# Reverse DNS Module
+https://github.com/flant/nginx-http-rdns
+
+# Installing Modules on nginx
+https://www.nginx.com/blog/compiling-dynamic-modules-nginx-plus/
+
+# Errors and fixes of dependencies
+https://kx.cloudingenium.com/linux/ubuntu/build-version-nginx/

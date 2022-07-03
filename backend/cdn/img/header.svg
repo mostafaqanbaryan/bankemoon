@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
+							"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+
+<svg xmlns="http://www.w3.org/2000/svg"
+		 width="100%" height="100%"
+		 viewBox="3 3 1360 350">
+		<defs>
+			<clipPath id='clipcut'>
+				<path id='block' 
+				d="M 0.00,332.00
+					 C 0.00,332.00 -30.00,116.00 516.00,112.00
+						 686.00,322.00 1368.00,-28.00 1366.00,128.00
+						 1364.00,284.00 1366.67,0.00 1366.67,0.00
+						 1366.67,0.00 -2.67,0.33 -0.67,0.33
+						 1.33,0.33 0.00,332.67 0.00,332.67" />
+			 </clipPath>
+			<linearGradient id='1st-grad' x1='0%' y1='0%' x2='100%' y2='100%'>
+				<stop offset='0%' style='stop-color: #081d2b; stop-opacity: 1' />
+				<stop offset='100%' style='stop-color: #fff; stop-opacity: 0.1' />
+			</linearGradient>
+			<linearGradient id='2st-grad' x1='0%' y1='0%' x2='100%' y2='100%'>
+				<stop offset='0%' style='stop-color: #081d2b; stop-opacity: 1' />
+				<stop offset='100%' style='stop-color: #333; stop-opacity: 0.5' />
+			</linearGradient>
+		</defs>
+	<g style='clip-path: url(#clipcut)'>
+		<path fill="url(#1st-grad)" 
+				d="M 0.00,0.00
+					 C 0.00,0.00 -22.00,162.00 514.00,162.00
+						 1066.00,160.00 965.93,0.02 1365.93,0.02" />
+		<path fill="url(#1st-grad)" 
+				d="M 0.01,399.99
+					 C 0.01,399.99 -16.00,334.00 424.00,148.00
+						 776.00,6.00 1002.00,12.00 1366.00,0.00
+						 942.00,0.00 0.00,0.00 0.00,0.00" />
+		<path fill="url(#2st-grad)" 
+				d="M 0.00,332.00
+					 C 0.00,332.00 -30.00,116.00 516.00,112.00
+						 686.00,322.00 1368.00,-28.00 1366.00,128.00
+						 1364.00,284.00 1366.67,0.00 1366.67,0.00
+						 1366.67,0.00 -2.67,0.33 -0.67,0.33
+						 1.33,0.33 0.00,332.67 0.00,332.67" />
+	</g>
+</svg>
+

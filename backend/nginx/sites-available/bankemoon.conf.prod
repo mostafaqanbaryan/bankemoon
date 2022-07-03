@@ -1,0 +1,343 @@
+
+## Put these lines in top of nginx.conf
+# include /usr/share/nginx/modules/*.conf;
+# load_module modules/ngx_http_rdns_module.so;
+
+## Put this in http{}
+# include /etc/nginx/sites-available/*.conf;
+##
+
+# Rate Limiter W/O Pre-flight OPTIONS
+map $request_method $limit_key {
+	default $binary_remote_addr;
+	OPTIONS "";
+}
+limit_req_zone $limit_key zone=login_zone:10m rate=1r/s;
+limit_req_zone $limit_key zone=register_zone:10m rate=30r/m;
+limit_req_zone $limit_key zone=forgot_password_zone:10m rate=10r/m;
+limit_req_zone $limit_key zone=captcha_zone:10m rate=120r/m;
+
+# SSL Cache
+ssl_session_cache shared:SSL:10m;
+ssl_session_timeout 10m;
+
+# Gzip Compression
+gzip on;
+gzip_buffers 16 8k;
+gzip_comp_level 6;
+gzip_http_version 1.1;
+gzip_min_length 256;
+gzip_proxied any;
+gzip_vary on;
+gzip_disable	"msie6";
+gzip_types
+	text/xml application/xml application/atom+xml application/rss+xml application/xhtml+xml image/svg+xml
+	text/javascript application/javascript application/x-javascript
+	text/x-json application/json application/x-web-app-manifest+json
+	text/css text/plain text/x-component
+	font/opentype application/x-font-ttf application/vnd.ms-fontobject
+	image/x-icon;
+
+upstream backend{
+	server localhost:5000;
+	# keepalive 32;
+}
+
+# WWW Redirect
+server {
+	listen			 80;
+	listen			 [::]:80;
+	server_name www.bankemoon.com;
+	return 301 https://bankemoon.com$request_uri;
+}
+
+# HTTPS Redirect
+server {
+	listen			 80;
+	listen			 [::]:80;
+	return 301 https://$host$request_uri;
+}
+
+# Portal
+# FrontPage : 4000
+server {
+	listen			 443 http2 ssl default_server;
+	listen			 [::]:443 http2 ssl default_server;
+	server_name  bankemoon.com;
+	ssl_certificate /etc/letsencrypt/live/bankemoon.com/fullchain.pem; # managed by Certbot
+	ssl_certificate_key /etc/letsencrypt/live/bankemoon.com/privkey.pem; # managed by Certbot
+	include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+	ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+	charset utf-8;
+	expires 1M;
+
+	# Load configuration files for the default server block.
+	# include /etc/nginx/default.d/*.conf;
+
+	add_header Cache-Control "public";
+	add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";
+	add_header X-Content-Type-Options "nosniff";
+	add_header X-Frame-Options "DENY";
+	add_header X-XSS-Protection "1; mode=block";
+	proxy_hide_header X-Powered-By;
+	proxy_hide_header Server;
+	error_page 404 /404.html;
+		location = /404/ {
+			rdns off;
+	}
+
+	error_page 500 502 503 504 /50x.html;
+		location = /50x/ {
+			rdns off;
+	}
+
+
+	location /portal {
+		resolver 8.8.8.8;
+		index index.html;
+		rdns_allow .*;
+		if ($http_user_agent ~* (Googlebot|Googlebot-Image|Google-Site-Verification|Google\ Web\ Preview)) {
+			rdns double;
+			set $block "true";
+		}
+		if ($rdns_hostname ~* (.*google\.com|.*googlebot\.com)){
+			rewrite ^/portal/page/(\d+)/?$ /banks?secret=aaa&page=$1 last;
+			rewrite ^ /banks?secret=aaa last;
+			set $block "false";
+		}
+		if ($block = "true"){
+			# rdns off;
+			return 444;
+		}
+
+		alias /bankemoon/portal;
+		try_files $uri /portal/index.html;
+	}
+
+	location / {
+		rdns off;
+		proxy_pass http://localhost:4000;
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection 'upgrade';
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_cache_bypass $http_upgrade;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_connect_timeout 150;
+		proxy_send_timeout 100;
+		proxy_read_timeout 100;
+		proxy_buffers 4 32k;
+		client_max_body_size 8m;
+		client_body_buffer_size 128k;
+	}
+}
+
+# CDN
+server {
+	listen			 443 http2 ssl;
+	listen			 [::]:443 http2 ssl;
+	server_name  cdn.bankemoon.com;
+	ssl_certificate /etc/letsencrypt/live/bankemoon.com/fullchain.pem; # managed by Certbot
+	ssl_certificate_key /etc/letsencrypt/live/bankemoon.com/privkey.pem; # managed by Certbot
+	include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+	ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+	root /bankemoon/cdn;
+	expires max;
+	access_log off;
+
+	add_header Cache-Control "public";
+	add_header 'Access-Control-Allow-Origin' 'https://bankemoon.com';
+	add_header 'Access-Control-Allow-Methods' 'GET';
+	add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,If-Modified-Since,Cache-Control,Content-Type,Range';
+	add_header 'Access-Control-Max-Age' 2592000;
+	add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range';
+	add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";
+	add_header X-Content-Type-Options "nosniff";
+	add_header X-Frame-Options "DENY";
+	add_header X-XSS-Protection "1; mode=block";
+	proxy_hide_header X-Powered-By;
+	proxy_hide_header Server;
+
+	location / {
+	}
+
+	location /export/pdf {
+		add_header 'Content-Type' 'application/pdf';
+		add_header 'Content-Disposition' 'attachment';
+		post_action @delete;
+	}
+
+	location @delete {
+		internal;
+		resolver 8.8.8.8;
+		proxy_pass http://backend/bots/export?path=$request_filename&clientIp=$remote_addr&status=$request_completion&passcode=DeleteByBB;
+		add_header 'Access-Control-Allow-Origin' 'https://bankemoon.com' always;
+		add_header 'Access-Control-Allow-Methods' 'GET' always;
+		add_header 'Access-Control-Allow-Headers' 
+			'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,User-ID,Authorization' always;
+		add_header 'Access-Control-Max-Age' 86400 always;
+		add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection 'upgrade';
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_cache_key "$host$request_uri $cookie_user";
+		proxy_cache_use_stale "updating";
+		proxy_cache_bypass $http_upgrade;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_connect_timeout 150;
+		proxy_send_timeout 100;
+		proxy_read_timeout 100;
+		proxy_buffers 4 32k;
+		client_max_body_size 8m;
+		client_body_buffer_size 128k;
+	}
+}
+
+# API : 5000
+server { 
+	listen			 443 http2 ssl;
+	listen			 [::]:443 http2 ssl;
+	server_name  api.bankemoon.com;
+	ssl_certificate /etc/letsencrypt/live/bankemoon.com/fullchain.pem; # managed by Certbot
+	ssl_certificate_key /etc/letsencrypt/live/bankemoon.com/privkey.pem; # managed by Certbot
+	include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+	ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+	charset utf-8;
+	expires -1;
+
+	proxy_http_version 1.1;
+	proxy_set_header Upgrade $http_upgrade;
+	proxy_set_header Connection 'upgrade';
+	proxy_set_header Host $host;
+	proxy_set_header X-Real-IP $remote_addr;
+	proxy_cache_key "$host$request_uri $cookie_user";
+	proxy_cache_use_stale "updating";
+	proxy_cache_bypass $http_upgrade;
+	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+	proxy_connect_timeout 150;
+	proxy_send_timeout 100;
+	proxy_read_timeout 100;
+	proxy_buffers 4 32k;
+	client_max_body_size 8m;
+	client_body_buffer_size 128k;
+
+	# Rate Limiter
+	limit_req_log_level warn;
+	limit_req_status 429;
+
+	# CORS
+	add_header 'Access-Control-Allow-Origin' 'https://bankemoon.com' always;
+	add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS' always;
+	add_header 'Access-Control-Allow-Headers' 
+		'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,User-ID,Authorization' always;
+	add_header 'Access-Control-Max-Age' 86400 always;
+	add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
+	add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";
+	add_header X-Content-Type-Options "nosniff";
+	add_header X-Frame-Options "DENY";
+	add_header X-XSS-Protection "1; mode=block";
+	proxy_hide_header X-Powered-By;
+	proxy_hide_header Server;
+
+	location / {
+		if ($request_method = 'OPTIONS') {
+			add_header 'Access-Control-Allow-Origin' 'https://bankemoon.com' always;
+			add_header 'Access-Control-Allow-Methods' 'GET, POST, DELETE, PUT, PATCH, OPTIONS' always;
+			add_header 'Access-Control-Allow-Headers' 
+				'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,User-ID,Authorization' always;
+			add_header 'Access-Control-Max-Age' 86400 always;
+			add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
+			add_header 'Access-Control-Max-Age' 1728000;
+			add_header 'Content-Type' 'text/plain; charset=utf-8';
+			add_header 'Content-Length' 0;
+			return 204;
+		}
+		proxy_pass http://backend;
+	}
+
+	location /auth/login {
+		limit_req zone=login_zone burst=2 nodelay;
+		proxy_pass http://backend/auth/login;
+	}
+
+	location /auth/register {
+		limit_req zone=register_zone;
+		proxy_pass http://backend/auth/register;
+	}
+
+	location /auth/forgot-password {
+		limit_req zone=forgot_password_zone burst=1 nodelay;
+		proxy_pass http://backend/auth/forgot-password;
+	}
+
+	location /auth/reset-password {
+		limit_req zone=forgot_password_zone burst=2 nodelay;
+		proxy_pass http://backend/auth/reset-password;
+	}
+
+	location /contact {
+		limit_req zone=forgot_password_zone;
+		proxy_pass http://backend/contact;
+	}
+
+	location /captcha {
+		limit_req zone=captcha_zone burst=2 nodelay;
+		proxy_pass http://backend/captcha;
+	}
+
+	error_page 429 /429;
+		location = /429 {
+			default_type application/json;
+			return 429 '{"status": "limited", "message": "لطفا با سرعت کمتری درخواست بدهید"}';
+	}
+
+	error_page 502 /502;
+		location = /502 {
+			default_type application/json;
+			return 502 '{"status": "error", "message": "سرور در دسترس نیست"}';
+	}
+}
+
+# cPanel
+server { 
+	listen			 443 http2 ssl;
+	listen			 [::]:443 http2 ssl;
+	server_name  cpanel.bankemoon.com;
+	ssl_certificate /etc/letsencrypt/live/bankemoon.com/fullchain.pem; # managed by Certbot
+	ssl_certificate_key /etc/letsencrypt/live/bankemoon.com/privkey.pem; # managed by Certbot
+	include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+	ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+	charset utf-8;
+	expires -1;
+
+	proxy_http_version 1.1;
+	proxy_set_header Upgrade $http_upgrade;
+	proxy_set_header Connection 'upgrade';
+	proxy_set_header Host $host;
+	proxy_set_header X-Real-IP $remote_addr;
+	proxy_cache_key "$host$request_uri $cookie_user";
+	proxy_cache_use_stale "updating";
+	proxy_cache_bypass $http_upgrade;
+	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+	proxy_connect_timeout 150;
+	proxy_send_timeout 100;
+	proxy_read_timeout 100;
+	proxy_buffers 4 32k;
+	client_max_body_size 8m;
+	client_body_buffer_size 128k;
+
+	add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";
+	add_header X-Content-Type-Options "nosniff";
+	add_header X-Frame-Options "DENY";
+	add_header X-XSS-Protection "1; mode=block";
+	proxy_hide_header X-Powered-By;
+	proxy_hide_header Server;
+
+	location / {
+		proxy_pass http://136.243.59.114:2082;
+	}
+}
+

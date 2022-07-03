@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang='fa' dir='rtl'>
+	<head>
+		<title><%= subject %></title>
+		<style>
+			html, body, #body{
+				font-family: IRANSans, sans-serif;
+				direction: rtl;
+				text-align: right;
+				box-sizing: border-box;
+				margin: 0 auto;
+				padding: 0;
+			}
+			a{
+				text-decoration: none;
+				color: rgb(104, 118, 120);
+				text-shadow: 1px 1px 4px #bbb;
+				text-align: left;
+				overflow-x: auto;
+			}
+			a:hover{
+				color: #333;
+			}
+			.col-12{
+				width: 100%;
+			}
+			.text-center{
+				text-align: center;
+			}
+			.text-left{
+				text-align: left;
+			}
+			.small{
+				font-size: 0.8rem;
+				color: #777;
+			}
+			.container{
+				padding: 10px;
+				margin-top: 10px;
+				border: 1px solid #ccc;
+			}
+			header{
+				padding: 5px 10px;
+			}
+			.logo{
+				text-align: left;
+			}
+			.logo img{
+				height: 120px;
+			}
+
+			main{
+				padding: 10px;
+			}
+			main > div{
+				padding: 20px 30px;
+				background: #eee;
+			}
+
+			.subject{
+				padding-right: 5px;
+				font-weight: 700;
+			}
+
+			.content{
+				font-size: 0.9rem;
+			}
+
+			.line{
+				padding-bottom: 10px;
+				display: block;
+			}
+
+			footer{
+				padding: 10px;
+			}
+			footer p{
+				padding: 10px 0;
+				font-size: 0.7rem;
+				color: #777;
+			}
+			.navbar{
+				list-style: none;
+				padding: 5px 10px;
+				text-align: center;
+				margin: 0 auto;
+			}
+			.navbar li{
+				display: inline;
+				font-size: 0.8rem;
+				border-left: 1px solid #ddd;
+			}
+			.navbar li:last-child{
+				border-left-width: 0;
+			}
+			.navbar a{
+				padding: 0px 20px;
+			}
+			@media (max-width:500px){
+				.col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12{
+					width: 100%;
+				}
+				.logo{
+					display: none;
+				}
+				.container{
+					border: none;
+					padding: 0;
+				}
+				main > div{
+					padding: 20px;
+				}
+				.subject, .content{
+					font-size: 0.8rem;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div id="body">
+			<div class="container">
+				<header>
+					<table>
+						<tr>
+							<td class="col-12">
+								<div class="title">
+									<h1>بانکمون</h1>
+									<p>
+										اولین سامانه اینترنتی مدیریت قرض‌الحسنه
+									</p>
+								</div>
+							</td>
+							<td>
+								<div class="logo">
+									<a href="https://bankemoon.com/" target="_blank">
+										<img src="https://cdn.bankemoon.com/img/logo.png" alt="لوگو" title="لوگو" />
+									</a>
+								</div>
+							</td>
+					</table>
+				</header>
+
+				<main>
+					<div>
+						<div>
+							<p style="padding-bottom: 15px">موضوع ایمیل: <span class="subject"><%= subject %></span></p>
+							<p class="content">
+								<span class="line"><%= name %> عزیز...</span>
+								<span class="line">با عرض سلام</span>
+								<% content.forEach(c => {%>
+									<% if(c.startsWith('http')){ %>
+										<a class="text-left line" href="<%= c %>" target="_blank"><%= c %></a>
+									<% } else if(c.startsWith('<p')){ %>
+										<%- c %>
+									<% } else { %>
+										<span class="line"><%= c %></span>
+									<%} %>
+								<% }); %>
+							</p>
+						</div>
+					</div>
+				</main>
+
+				<footer>
+					<nav>
+						<p class="small text-center">درصورت غیرفعال بودن لینک، آدرس لینک را کپی کرده و در مرورگر خود اجرا کنید</p>
+						<ul class="navbar">
+							<li>
+								<a href="https://bankemoon.com/auth/login/">ورود</a>
+							</li>
+							<li>
+								<a href="https://bankemoon.com/auth/register/">عضویت</a>
+							</li>
+							<li>
+								<a href="https://bankemoon.com/tutorials/">آموزش</a>
+							</li>
+							<li>
+								<a href="https://bankemoon.com/news/">اخبار</a>
+							</li>
+							<li>
+								<a href="https://bankemoon.com/contact/">تماس با ما</a>
+							</li>
+						</ul>
+					</nav>
+					<p class="text-center">
+						Copyright by <a href="https://bankemoon.com/">Bankemoon</a>
+					</p>
+				</footer>
+			</div>
+		</div>
+	</body>
+</html>
+

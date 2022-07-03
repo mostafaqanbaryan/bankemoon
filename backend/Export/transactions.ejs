@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang='fa' dir='rtl'>
+	<head>
+		<title><%= title %></title>
+		<style>
+			@font-face{
+				font-family: IRANSans;
+				src: url('./fonts/IRANSans(FaNum).ttf');
+			}
+			html, body, #body{
+				font-family: IRANSans, sans-serif;
+				direction: rtl;
+				text-align: right;
+				box-sizing: border-box;
+				margin: 0 auto;
+				padding: 0;
+			}
+			header{
+				padding: 5px 10px;
+			}
+			.logo{
+				text-decoration: none;
+			}
+			.logo img{
+				height: 40px;
+				vertical-align: middle;
+			}
+
+			main{
+				padding: 10px;
+			}
+
+			.content-table{
+				width: 100%;
+				border: 1px solid #333;
+				border-collapse: collapse;
+				font-size: 0.7rem;
+			}
+			.content-table td{
+				border: 1px solid #333;
+				padding: 2px 4px;
+			}
+
+			.subject{
+				padding-right: 5px;
+				font-weight: 700;
+			}
+
+			footer{
+				padding: 10px;
+			}
+			footer p{
+				padding: 10px 0;
+				font-size: 0.7rem;
+				color: #777;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="body">
+			<header>
+				<div class="title">
+					<h2 style='vertical-align: middle'>
+						<a class='logo' href="https://bankemoon.com/" target="_blank">
+							<img src="../cdn/img/logo.png" alt="لوگو" title="لوگو" />
+						</a>
+						<span style="color: #666">بانکمون</span>
+						<p style='float: left; font-size: 0.8rem'>
+							اولین سامانه اینترنتی مدیریت قرض‌الحسنه
+						</p>
+					</h2>
+				</div>
+
+				<div style='text-align: center'>
+					<p>
+						<span style='font-size: 1rem;display: block;'><%= title %></span>
+						<span style='font-size: 0.5rem'>ساخت گزارش توسط <%= createdBy %></span>
+					</p>
+					<p style='font-size: 0.7rem'>
+						<%- description.filter(d => d && d.length > 0).join(' - '); %>
+					</p>
+				</div>
+			</header>
+
+			<main>
+				<table class='content-table'>
+					<tr style='height: 50px'>
+						<td>شماره تراکنش</td>
+						<td>تاریخ ایجاد</td>
+						<td>تاریخ تراکنش</td>
+						<td>دسته</td>
+						<td>نام صاحب حساب</td>
+						<td>مبلغ</td>
+					</tr>
+					<% rows.map(row => { %>
+						<tr>
+							<td><%= row.id %></td>
+							<td><%= moment(row.created_at).format('jYYYY/jMM/jDD') %></td>
+							<td><%= moment(row.created_at_bank).format('jYYYY/jMM/jDD') %></td>
+							<td><%= constant.persian.transactions[row.type] %></td>
+							<td><%= row.full_name %></td>
+							<td style='direction: ltr; text-align: left'>
+								<%= row.value.toString().replace('-', '').replace(/\B(?=(\d{3})+(?!\d))/g, ',') %>
+							</td>
+						</tr>
+					<% }); %>
+				</table>
+			</main>
+
+			<footer>
+				<p style='text-align: center'>
+					Copyright by <a href="https://bankemoon.com/">Bankemoon</a>
+				</p>
+			</footer>
+	</div>
+</body>
+</html>
+

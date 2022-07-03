@@ -1,0 +1,28 @@
+{
+  "name": "homepage",
+  "version": "1.0.0",
+  "description": "Bankemoon Homepage",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo 'Save BuildID';cp .next/BUILD_ID .next/BUILD_ID.tmp; echo 'Building App...'; NODE_ENV=production NODE_PATH=./ next build; echo 'Make a backup of new BuildID'; mv .next/BUILD_ID .next/BUILD_ID.bak; echo 'Replace BuildId'; mv .next/BUILD_ID.tmp .next/BUILD_ID; echo -e 'Go to frontend and reset pm2\nDone!';",
+    "start": "NODE_PATH=./ node server.js",
+    "export": "NODE_ENV=production NODE_PATH=./ next export",
+    "react": "NODE_PATH=./ react-scripts start"
+  },
+  "author": "Mostafa Qanbaryan",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "cors": "^2.8.4",
+    "express": "^4.16.3",
+    "md5": "^2.2.1",
+    "moment-jalali": "^0.3.9",
+    "next": "^6.1.2",
+    "prop-types": "^15.6.2",
+    "react": "^16.5.2",
+    "react-dom": "^16.5.2",
+    "react-html-parser": "^2.0.2",
+    "typed.js": "^2.0.9"
+  }
+}

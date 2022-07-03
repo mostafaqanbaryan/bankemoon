@@ -1,0 +1,61 @@
+{
+  "name": "little-bank",
+  "version": "1.0.0",
+  "description": "A little bank using Node.js",
+  "main": "server.js",
+  "dependencies": {
+    "autosuggest-highlight": "^3.1.1",
+    "axios": "^0.18.0",
+    "bcrypt": "^3.0.0",
+    "bcrypt-nodejs": "0.0.3",
+    "body-parser": "^1.18.3",
+    "bunyan": "^1.8.12",
+    "canvas": "^1.6.12",
+    "config": "^1.31.0",
+    "cors": "^2.8.4",
+    "ejs": "^2.6.1",
+    "email-templates": "^4.0.4",
+    "express": "^4.16.3",
+    "express-rate-limit": "^2.14.2",
+    "express-validator": "^4.3.0",
+    "helmet": "^3.13.0",
+    "html-pdf": "^2.2.0",
+    "jsonwebtoken": "^8.3.0",
+    "memcached": "^2.2.2",
+    "moment-jalaali": "^0.7.4",
+    "mongoose-timestamp": "^0.6.0",
+    "multer": "^1.3.1",
+    "nodemailer": "^4.6.8",
+    "passport": "^0.4.0",
+    "passport-http-bearer": "^1.0.1",
+    "pg": "^7.4.3",
+    "react-autosuggest": "^9.4.1",
+    "redis": "^2.8.0",
+    "request-ip": "^2.1.1",
+    "sharp": "^0.20.8",
+    "soap": "^0.25.0",
+    "ua-parser-js": "^0.7.18"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-http": "^4.2.0",
+    "enzyme": "^3.6.0",
+    "eslint-plugin-security": "^1.4.0",
+    "react-addons-test-utils": "^15.6.2"
+  },
+  "scripts": {
+    "start": "[[ ! $NODE_ENV ]] && NODE_ENV='production' && export NODE_ENV; echo $NODE_ENV; [ $NODE_ENV == 'production' ] && node server.js | bunyan || nodemon | bunyan;",
+    "init": "node init",
+    "test": "NODE_ENV=test PGNAME=bankemoon_test mocha --timeout 5000 --exit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mostafaqanbaryan/bankemoon.git"
+  },
+  "author": "Mostafa Qanbaryan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mostafaqanbaryan/bankemoon/issues"
+  },
+  "homepage": "https://github.com/mostafaqanbaryan/bankemoon#README"
+}
